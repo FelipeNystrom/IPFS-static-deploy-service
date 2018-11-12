@@ -1,13 +1,19 @@
 const fs = require('fs');
 const path = require('path');
 const IPFS = require('ipfs-api');
-const ipfs = new IPFS({
-  host: 'gateway.ipfs.io',
-  port: 443,
+const ipfs = IPFS({
+  host: 'ipfs.infura.io',
+  port: 5001,
   protocol: 'https'
 });
-const deploy = path.join(__dirname, '/client/build');
-fs.access(deploy, err => {
+
+console.log(ipfs);
+
+const toDeploy = path.join(__dirname, '/client/build');
+
+console.log(toDeploy);
+
+fs.access(toDeploy, err => {
   console.log(`Production folder ${err ? 'does not exist.' : 'exists.'}`);
 
   // if build folder does not exist. Exit deploy process
@@ -18,20 +24,37 @@ fs.access(deploy, err => {
     return;
   }
 
-  console.log(`Preparing to deploy to IPFS!`);
-
-  fs.readdir(deploy, 'buffer', async (err, files) => {
-    const build = files.map(file => file);
-
-    console.log('Deploying!');
-
-    // deploy to ipfs
-    ipfs.add(build, console.log);
-  });
+  publishOnIPFS();
 });
-
 // Watch build folder for changes
-fs.watch(deploy, async changedFiles => {
+fs.watch(toDeploy, async changedFiles => {
   console.log('these files have changed', changedFiles);
 });
-const publishOnIPFS = async () => {};
+
+const publishOnIPFS = async () => {
+  console.log('Preparing to deploy build folder to IPFS');
+
+  try {
+    const result = await ipfs.util.addFromFs(toDeploy, {
+      recursive: true
+    });
+
+    console.log('length of result', result.length);
+
+    let lastHash;
+    for (let i = 0; i < result.length; i++) {
+      let file = result[i];
+      if (/build$/.test(file.path)) {
+        lastHash = file.hash;
+        break;
+      }
+    }
+    console.log('Hash of build folder', lastHash);
+
+    const published = await ipfs.name.publish(lastHash);
+
+    console.log(published);
+  } catch (err) {
+    console.log(err);
+  }
+};

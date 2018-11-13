@@ -18,14 +18,6 @@ fs.access(toDeploy, err => {
   return publishOnIPFS();
 });
 // Watch build folder for changes
-fs.watch(toDeploy, async changedFiles => {
-  console.log('these files have changed', changedFiles);
-  if (changedFiles) {
-    console.log('re-deploying to IPFS');
-
-    return publishOnIPFS();
-  }
-});
 
 const publishOnIPFS = async () => {
   console.log('Preparing to deploy build folder to IPFS');
@@ -48,16 +40,14 @@ const publishOnIPFS = async () => {
     console.log('Hash of build folder', lastHash);
 
     console.log(
-      'Publishing to IPFS. This can take some time. Please have bear with us!'
+      'Publishing to IPFS. This can take some time. Please be patient'
     );
 
     const deployed = await ipfs.name.publish(lastHash);
     const peerId = deployed.name;
-
+    console.log(`your peerID is `, peerId);
     console.log(
-      'deployed ',
-      deployed,
-      `to IPFS. Visit https://ipfs.io/ipns/${peerId} to visit your site.`
+      `deployed site to IPFS. Visit on https://ipfs.io/ipns/${peerId}.`
     );
 
     return;

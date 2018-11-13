@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev-client": "cd client && npm start",
-    "build-client": "cd client && npm run build",
-    "ipfs": "NODE_ENV=development nodemon -r dotenv/config ipfs.js"
+    "client-dev": "cd client && npm start",
+    "client-build": "cd client && npm run build",
+    "ipfs-deploy": "NODE_ENV=development node -r dotenv/config ipfs.js"
   },
   "keywords": [],
   "author": "",

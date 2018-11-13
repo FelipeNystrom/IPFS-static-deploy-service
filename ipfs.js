@@ -1,17 +1,8 @@
 const fs = require('fs');
 const path = require('path');
-const IPFS = require('ipfs-api');
-const ipfs = IPFS({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https'
-});
-
-console.log(ipfs);
+const ipfs = require('./nodeSetup');
 
 const toDeploy = path.join(__dirname, '/client/build');
-
-console.log(toDeploy);
 
 fs.access(toDeploy, err => {
   console.log(`Production folder ${err ? 'does not exist.' : 'exists.'}`);
@@ -24,11 +15,16 @@ fs.access(toDeploy, err => {
     return;
   }
 
-  publishOnIPFS();
+  return publishOnIPFS();
 });
 // Watch build folder for changes
 fs.watch(toDeploy, async changedFiles => {
   console.log('these files have changed', changedFiles);
+  if (changedFiles) {
+    console.log('re-deploying to IPFS');
+
+    return publishOnIPFS();
+  }
 });
 
 const publishOnIPFS = async () => {
@@ -39,7 +35,7 @@ const publishOnIPFS = async () => {
       recursive: true
     });
 
-    console.log('length of result', result.length);
+    console.log('deployed', result.length, ' files to IPFS. Files: ', result);
 
     let lastHash;
     for (let i = 0; i < result.length; i++) {
@@ -51,10 +47,21 @@ const publishOnIPFS = async () => {
     }
     console.log('Hash of build folder', lastHash);
 
-    const published = await ipfs.name.publish(lastHash);
+    console.log(
+      'Publishing to IPFS. This can take some time. Please have bear with us!'
+    );
 
-    console.log(published);
+    const deployed = await ipfs.name.publish(lastHash);
+    const peerId = deployed.name;
+
+    console.log(
+      'deployed ',
+      deployed,
+      `to IPFS. Visit https://ipfs.io/ipns/${peerId} to visit your site.`
+    );
+
+    return;
   } catch (err) {
-    console.log(err);
+    return console.log(err);
   }
 };

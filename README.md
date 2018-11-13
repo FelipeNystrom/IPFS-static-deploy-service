@@ -1,4 +1,4 @@
-#IPFS DEPLOY SERVICE
+# IPFS DEPLOY SERVICE
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
 and is deployed on [IPFS](https://ipfs.io/) (Inter Planetary File System)

@@ -1,4 +1,4 @@
-const IPFS = require('ipfs-api');
+const IPFS = require('ipfs-http-client');
 const { IPFS_HOST, IPFS_PORT } = process.env;
 
 // Connect to local or remote node
